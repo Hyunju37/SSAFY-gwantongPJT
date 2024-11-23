@@ -2,11 +2,15 @@ import json
 import random
 import time
 import os
+import numpy as np
+##from sklearn.decomposition import PCA
 from datetime import datetime
+import re
 import requests
 from bs4 import BeautifulSoup
 from django.core.management.base import BaseCommand
-
+from sentence_transformers import SentenceTransformer
+from openai import OpenAI
 from news.models import Article
 from django.db import IntegrityError, transaction
 import logging
@@ -84,7 +88,8 @@ class Command(BaseCommand):
                 for item in data.get('items', []):
                     title = BeautifulSoup(item.get('title'), 'html.parser').get_text()
                     subtitle = BeautifulSoup(item.get('description', ''), 'html.parser').get_text()
-                    link = BeautifulSoup(item.get('originallink'), 'html.parser').get_text()
+                    link = BeautifulSoup(item.get('link'), 'html.parser').get_text()
+                    #link = BeautifulSoup(item.get('originallink'), 'html.parser').get_text()
                     pub_date = BeautifulSoup(item.get('pubDate'), 'html.parser').get_text()
 
                     # 뉴스 내용 가져오기
@@ -148,6 +153,16 @@ class Command(BaseCommand):
             logger.info("JSON 파일이 성공적으로 생성되었습니다.")
             return json_file_path
 
+        def get_embedding(text):
+            dotenv_file = dotenv.find_dotenv('/home/hj/final-project/.env')
+            CLIENT_ID = dotenv.dotenv_values(dotenv_file)['OPENAI_API_KEY']
+
+            client = OpenAI(api_key=CLIENT_ID)
+            text = text.replace("\n", " ")
+            return client.embeddings.create(input = [text], 
+                                            model='text-embedding-3-small',
+                                            dimensions=256).data[0].embedding
+
         # 크롤링 실행
         json_file_path = collect_data_and_store_json_file(base_directory, '대학교')
 
@@ -171,12 +186,16 @@ class Command(BaseCommand):
                 except:
                     write_date = datetime.now()
 
+            embedding = get_embedding(text=f"{data.get('title', 'No Title')} {data.get('subtitle', '')}")
+
+
             article = Article(
                 title=data.get('title', 'No Title'),
                 subtitle=data.get('subtitle', ''),
                 content=data.get('content', ''),
                 write_date=write_date,
-                url=data.get('url', '')
+                url=data.get('url', ''),
+                embedding = embedding
             )
             articles_to_create.append(article)
 

@@ -1,4 +1,5 @@
 from django.db import models
+from pgvector.django import VectorField
 
 # Create your models here.
 class Article(models.Model):
@@ -7,6 +8,7 @@ class Article(models.Model):
     content = models.TextField()
     write_date = models.DateTimeField()
     url = models.URLField(unique=True)
+    embedding = VectorField(dimensions=256)
 
     def __str__(self):
         return self.title
