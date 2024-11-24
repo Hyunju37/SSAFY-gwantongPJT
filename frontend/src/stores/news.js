@@ -31,8 +31,13 @@ export const useNewsStore = defineStore('news', {
     },
     async fetchSimilarNews(id) {
       try {
-        const response = await axios.get(`/api/news/${id}/similar/`)
-        this.similarNews = response.data
+        const response = await axios.get(`http://127.0.0.1:8000/api/news/${id}/similar/`)
+        this.similarNews = response.data.map(news => ({
+          id: news.id,
+          title: news.title,
+          summary: news.subtitle,
+          date: news.write_date || '2024-11-22'
+        }))
       } catch (error) {
         console.error('유사한 뉴스 가져오기 오류:', error)
       }
@@ -50,7 +55,7 @@ export const useNewsStore = defineStore('news', {
           console.error('검색 결과 가져오기 오류:', error)
         }
     },
-        // 카테고리별 뉴스 데이터 가져오기
+    // 카테고리별 뉴스 데이터 가져오기
     async fetchNewsByCategory(category, page) {
       try {
         // 실제 API 호출로 대체

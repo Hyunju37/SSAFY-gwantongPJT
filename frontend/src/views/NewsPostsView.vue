@@ -97,36 +97,36 @@
   // 유사한 뉴스 상태 변수
   const similarNews = ref([
     // 임의의 데이터
-    {
-      id: 1,
-      title: '유사한 뉴스 제목 1',
-      summary: '유사한 뉴스 요약 1...',
-      date: '2024-11-20'
-    },
-    {
-      id: 2,
-      title: '유사한 뉴스 제목 2',
-      summary: '유사한 뉴스 요약 2...',
-      date: '2024-11-19'
-    },
-    {
-      id: 3,
-      title: '유사한 뉴스 제목 3',
-      summary: '유사한 뉴스 요약 3...',
-      date: '2024-11-18'
-    },
-    {
-      id: 4,
-      title: '유사한 뉴스 제목 4',
-      summary: '유사한 뉴스 요약 4...',
-      date: '2024-11-17'
-    },
-    {
-      id: 5,
-      title: '유사한 뉴스 제목 5',
-      summary: '유사한 뉴스 요약 5...',
-      date: '2024-11-16'
-    }
+    // {
+    //   id: 1,
+    //   title: '유사한 뉴스 제목 1',
+    //   summary: '유사한 뉴스 요약 1...',
+    //   date: '2024-11-20'
+    // },
+    // {
+    //   id: 2,
+    //   title: '유사한 뉴스 제목 2',
+    //   summary: '유사한 뉴스 요약 2...',
+    //   date: '2024-11-19'
+    // },
+    // {
+    //   id: 3,
+    //   title: '유사한 뉴스 제목 3',
+    //   summary: '유사한 뉴스 요약 3...',
+    //   date: '2024-11-18'
+    // },
+    // {
+    //   id: 4,
+    //   title: '유사한 뉴스 제목 4',
+    //   summary: '유사한 뉴스 요약 4...',
+    //   date: '2024-11-17'
+    // },
+    // {
+    //   id: 5,
+    //   title: '유사한 뉴스 제목 5',
+    //   summary: '유사한 뉴스 요약 5...',
+    //   date: '2024-11-16'
+    // }
   ])
   
   // 뉴스 데이터 로딩
@@ -135,6 +135,7 @@
     // TODO: 실제 API 호출로 데이터 가져오기
     // 임의의 데이터 설정
     fetchNewsItem(newsId)
+    fetchSimilarNews(newsId)
   })
   
   const fetchNewsItem = async (id) => {
@@ -145,6 +146,11 @@
       likes: 0,  // 상수값으로 고정
       views: 0  // 상수값으로 고정
     }  // 스토어에서 가져온 데이터를 newsData에 할당
+  }
+
+  const fetchSimilarNews = async (id) => {
+    await newsStore.fetchSimilarNews(id)
+    similarNews.value = newsStore.similarNews
   }
 
   // 좋아요 기능
