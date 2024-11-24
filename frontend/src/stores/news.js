@@ -15,8 +15,16 @@ export const useNewsStore = defineStore('news', {
   actions: {
     async fetchNewsItem(id) {
       try {
-        const response = await axios.get(`/api/news/${id}/`)
-        this.newsItem = response.data
+        const response = await axios.get(`http://127.0.0.1:8000/api/posts/${id}/`)
+        this.newsItem = {
+          id: response.data.id,
+          title: response.data.title,
+          subtitle: response.data.subtitle,
+          date: response.data.write_date || '2024-11-22',
+          content: response.data.content,
+          originalUrl: response.data.url
+        }
+        //console.log(this.newsItem)
       } catch (error) {
         console.error('뉴스 데이터 가져오기 오류:', error)
       }
@@ -31,8 +39,13 @@ export const useNewsStore = defineStore('news', {
     },
     async searchNews(query) {
         try {
-          const response = await axios.get(`/api/news/search/?query=${query}`)
-          this.searchResults = response.data
+          const response = await axios.get(`http://127.0.0.1:8000/api/news/search/?query=${query}`)
+          this.searchResults = response.data.map(news => ({
+            id: news.id,
+            title: news.title,
+            summary: news.subtitle,
+            date: news.write_date || '2024-11-22'
+          }))
         } catch (error) {
           console.error('검색 결과 가져오기 오류:', error)
         }

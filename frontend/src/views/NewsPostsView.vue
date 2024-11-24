@@ -54,12 +54,12 @@
   <script setup>
   import { ref, onMounted } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
-//   import { useNewsStore } from '@/stores/news'
+  import { useNewsStore } from '@/stores/news'
   import Layout from '@/components/Layout.vue'
-  
+  import axios from 'axios'  // axios 추가
   const route = useRoute()
   const router = useRouter()
-//   const newsStore = useNewsStore()
+  const newsStore = useNewsStore()
 
 
 //   // 뉴스 데이터 로딩
@@ -134,19 +134,19 @@
     const newsId = route.params.id
     // TODO: 실제 API 호출로 데이터 가져오기
     // 임의의 데이터 설정
-    newsData.value = {
-      id: newsId,
-      category: '경제',
-      title: `뉴스 제목 ${newsId}`,
-      subtitle: '이것은 뉴스의 부제목입니다.',
-      date: '2024-11-21',
-      likes: 10,
-      views: 100,
-      content: '여기에 뉴스의 자세한 내용이 표시됩니다.',
-      originalUrl: 'https://example.com/original-article'
-    }
+    fetchNewsItem(newsId)
   })
   
+  const fetchNewsItem = async (id) => {
+    await newsStore.fetchNewsItem(id)  // Pinia 스토어의 fetchNewsItem 액션 호출
+    newsData.value = {
+      ...newsStore.newsItem,
+      category: '기본 카테고리',  // 상수값으로 고정
+      likes: 0,  // 상수값으로 고정
+      views: 0  // 상수값으로 고정
+    }  // 스토어에서 가져온 데이터를 newsData에 할당
+  }
+
   // 좋아요 기능
   const likeNews = () => {
     // TODO: 실제 좋아요 기능 구현

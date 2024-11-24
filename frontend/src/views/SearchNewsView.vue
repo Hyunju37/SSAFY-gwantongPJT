@@ -28,30 +28,14 @@
   <script setup>
   import { ref, onMounted } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
-//   import { useNewsStore } from '@/stores/news' // 스토어 임포트
+  import { useNewsStore } from '@/stores/news' // 스토어 임포트
   import Layout from '@/components/Layout.vue'
   
   const route = useRoute()
   const router = useRouter()
 
-//   const newsStore = useNewsStore()
+  const newsStore = useNewsStore()
 
-//   // 검색어 상태 변수
-//   const searchQuery = ref('')
-
-//   // 컴포넌트 마운트 시 검색어와 결과를 가져옴
-//   onMounted(() => {
-//     searchQuery.value = route.query.query || ''
-//     newsStore.searchNews(searchQuery.value) // 스토어 액션 호출
-//   })
-
-//   // 검색 결과 가져오기
-//   const searchResults = computed(() => newsStore.searchResults)
-
-//   // 뉴스 게시물 페이지로 이동
-//   const navigateToNews = (id) => {
-//     router.push(`/news-posts/${id}`)
-//   }
   
   // 검색어와 검색 결과 상태 변수
   const searchQuery = ref('')
@@ -64,27 +48,29 @@
   })
   
   // 검색 결과를 가져오는 함수 (모의 데이터 사용)
-  const fetchSearchResults = () => {
+  const fetchSearchResults = async () => {
+    await newsStore.searchNews(searchQuery.value)  // Pinia 스토어의 searchNews 액션 호출
+    searchResults.value = newsStore.searchResults
     // TODO: 실제 API 호출로 데이터 가져오기
-    if (searchQuery.value) {
-      // 임의의 데이터 설정
-      searchResults.value = [
-        {
-          id: 1,
-          title: `검색된 뉴스 제목 1 (${searchQuery.value})`,
-          summary: '이것은 검색된 뉴스의 요약입니다.',
-          date: '2024-11-22'
-        },
-        {
-          id: 2,
-          title: `검색된 뉴스 제목 2 (${searchQuery.value})`,
-          summary: '이것은 검색된 뉴스의 요약입니다.',
-          date: '2024-11-21'
-        }
-      ]
-    } else {
-      searchResults.value = []
-    }
+    // if (searchQuery.value) {
+    //   // 임의의 데이터 설정
+    //   searchResults.value = [
+    //     {
+    //       id: 1,
+    //       title: `검색된 뉴스 제목 1 (${searchQuery.value})`,
+    //       summary: '이것은 검색된 뉴스의 요약입니다.',
+    //       date: '2024-11-22'
+    //     },
+    //     {
+    //       id: 2,
+    //       title: `검색된 뉴스 제목 2 (${searchQuery.value})`,
+    //       summary: '이것은 검색된 뉴스의 요약입니다.',
+    //       date: '2024-11-21'
+    //     }
+    //   ]
+    // } else {
+    //   searchResults.value = []
+    // }
   }
   
   // 뉴스 게시물 페이지로 이동
