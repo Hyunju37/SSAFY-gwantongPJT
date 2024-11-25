@@ -17,7 +17,7 @@ class Command(BaseCommand):
             ('POL', '정치'),
             ('CUL', '문화'),
             ('SPT', '스포츠'),
-            ('ITS', 'IT및 과학'),
+            ('ITS', 'IT및과학'),
             ('SCI', '사회'),
             ('ENT', '연예'),
             ('ENV', '환경'),

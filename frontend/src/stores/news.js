@@ -61,7 +61,7 @@ export const useNewsStore = defineStore('news', {
       try {
         // 실제 API 호출로 대체
         const response = await axios.get(`http://127.0.0.1:8000/api/news?category=${category}&page=${page}`)
-
+        
         //console.log(response.data['articles'])
         this.newsData.imageNews = response.data['articles_imageNews'].map(news => ({
           id: news.id,

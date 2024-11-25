@@ -194,7 +194,7 @@
 
   // 수정 추가
   // 카테고리 관련 상태 변수
-  const categories = ref(['전체', '언어', '경제', '교육', '정치', '문화', '스포츠', 'IT/과학'])
+  const categories = ref(['전체', '언어', '경제', '교육', '정치', '문화', '스포츠', 'IT및과학'])
   const availableCategories = ref(['사회', '연예', '환경', '건강', '여행', '자동차']) // 추가 가능한 카테고리 예시
   const isCategoryPopupOpen = ref(false)
 
@@ -317,7 +317,7 @@
     // 임의의 데이터 사용
     // console.log(activeCategory.value)
     const newsData = await newsStore.fetchNewsByCategory(activeCategory.value, currentPage.value)
-    //console.log(newsData)
+    // console.log(newsData)
     imageNewsBoards.value = newsData.imageNews
     newsCards.value = newsData.newsCards
 

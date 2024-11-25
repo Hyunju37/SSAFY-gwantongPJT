@@ -80,7 +80,7 @@ def get_similar_article_by_id(request, pk):
 @api_view(['GET'])
 def get_articles_by_category(request):
     try:
-        category = request.query_params.get('category', '')
+        category = request.query_params.get('category', '')  
         page = request.query_params.get('page', 1)
         if category == '전체':
             articles = Article.objects.all().order_by('-write_date')

@@ -67,15 +67,17 @@ class Command(BaseCommand):
             }
 
             # 최대 기사 수와 한 번에 가져올 기사 수 설정
-            MAX_ARTICLES = 30
+            # MAX_ARTICLES = 30
             DISPLAY = 10  # 한 번에 가져올 기사 수 (최대 100개)
-
+            valid_news_count = 0
+            start = 1
             # 뉴스 데이터 저장 리스트
             news_list = []
-
-            for start in range(1, MAX_ARTICLES + 1, DISPLAY):
-                # API 요청 URL 구성
+            while valid_news_count < 100:
                 url = f'{base_url}?query={encoded_query}&display={DISPLAY}&start={start}'
+            # for start in range(1, MAX_ARTICLES + 1, DISPLAY):
+            #     # API 요청 URL 구성
+            #     url = f'{base_url}?query={encoded_query}&display={DISPLAY}&start={start}'
 
                 # 뉴스 데이터 요청
                 response = requests.get(url, headers=headers)
@@ -87,61 +89,71 @@ class Command(BaseCommand):
                 data = response.json()
 
                 for item in data.get('items', []):
-                    title = BeautifulSoup(item.get('title'), 'html.parser').get_text()
-                    subtitle = BeautifulSoup(item.get('description', ''), 'html.parser').get_text()
                     link = BeautifulSoup(item.get('link'), 'html.parser').get_text()
-                    #link = BeautifulSoup(item.get('originallink'), 'html.parser').get_text()
-                    pub_date = BeautifulSoup(item.get('pubDate'), 'html.parser').get_text()
+                    if link.startswith('https://n.news.naver.com'):
+                        title = BeautifulSoup(item.get('title'), 'html.parser').get_text()
+                        subtitle = BeautifulSoup(item.get('description', ''), 'html.parser').get_text()
+                        #link = BeautifulSoup(item.get('originallink'), 'html.parser').get_text()
+                        pub_date = BeautifulSoup(item.get('pubDate'), 'html.parser').get_text()
 
-                    # 뉴스 내용 가져오기
-                    try:
-                        news_response = requests.get(link, timeout=10)
-                        if news_response.status_code == 200:
-                            soup = BeautifulSoup(news_response.text, 'html.parser')
-                            # 뉴스 사이트마다 내용이 다르므로 적절한 태그 선택 필요
-                            content = ''
-                            article_div = soup.find('div', {'id': 'articleBodyContents'})
-                            if article_div:
-                                content = article_div.get_text(separator='\n').strip()
+                        # 뉴스 내용 가져오기
+                        try:
+                            news_response = requests.get(link, timeout=10)
+                            if news_response.status_code == 200:
+                                soup = BeautifulSoup(news_response.text, 'html.parser')
+                                # 뉴스 사이트마다 내용이 다르므로 적절한 태그 선택 필요
+                                # content = ''
+                                # article_div = soup.find('div', {'id': 'articleBodyContents'})
+                                article = soup.find('article', {'id': 'dic_area'})
+                                if article:
+                                    content = article.get_text(separator='\n').strip()
+                                    content = content.replace('\n','')
+                                else:
+                                    paragraphs = soup.find_all('p')
+                                    content = '\n'.join([p.get_text() for p in paragraphs])
+                                # if article_div:
+                                #     content = article_div.get_text(separator='\n').strip()
+                                # else:
+                                #     paragraphs = soup.find_all('p')
+                                #     content = '\n'.join([p.get_text() for p in paragraphs])
                             else:
-                                paragraphs = soup.find_all('p')
-                                content = '\n'.join([p.get_text() for p in paragraphs])
-                        else:
-                            content = ''
-                    except Exception as e:
-                        logger.error(f"Failed to retrieve content from {link}: {e}")
-                        content = ''
+                                logger.warning(f"Unable to retrieve content from {link}: Status Code {news_response.status_code}")
+                        except Exception as e:
+                            logger.error(f"Failed to retrieve content from {link}: {e}")
+                            #content = ''
 
-                    # pub_date 형식 변환
-                    try:
-                        parsed_date = datetime.strptime(pub_date, '%a, %d %b %Y %H:%M:%S %z')
-                        formatted_date = parsed_date.strftime('%Y-%m-%d %H:%M:%S')
-                    except Exception as e:
-                        logger.error(f"Failed to parse pubDate '{pub_date}': {e}")
-                        formatted_date = pub_date  # 변환 실패 시 원본 값 사용
+                        # pub_date 형식 변환
+                        try:
+                            parsed_date = datetime.strptime(pub_date, '%a, %d %b %Y %H:%M:%S %z')
+                            formatted_date = parsed_date.strftime('%Y-%m-%d %H:%M:%S')
+                        except Exception as e:
+                            logger.error(f"Failed to parse pubDate '{pub_date}': {e}")
+                            formatted_date = pub_date  # 변환 실패 시 원본 값 사용
 
-                    news_list.append({
-                        'title': title,
-                        'subtitle': subtitle,
-                        'content': content,
-                        'write_date': formatted_date,
-                        'url': link
-                    })
-
+                        news_list.append({
+                            'title': title,
+                            'subtitle': subtitle,
+                            'content': content,
+                            'write_date': formatted_date,
+                            'url': link
+                        })
+                        valid_news_count += 1
+                        if valid_news_count >= 100:
+                            break
                     # API 호출 제한을 피하기 위해 잠시 대기
                     time.sleep(0.5)
-
+                start += DISPLAY
                 # API 호출 후 현재 저장된 기사 수 출력
                 logger.info(f"Retrieved {len(news_list)} articles so far...")
 
                 # 최대 기사를 다 가져오면 중지
-                if len(news_list) >= MAX_ARTICLES:
-                    break
+                # if len(news_list) >= MAX_ARTICLES:
+                #     break
 
             # JSON 구조 생성
             json_data = {
                 "SJML": {
-                    "text": news_list[:MAX_ARTICLES]  # 최대 MAX_ARTICLES만 저장
+                    "text": news_list  # 최대 MAX_ARTICLES만 저장
                 }
             }
 
@@ -171,10 +183,10 @@ class Command(BaseCommand):
         merged_data_list = load_one_json_file_and_merge(json_file_path)
 
         # 랜덤으로 데이터 추출 (필요에 따라 조정 가능)
-        data_list = random.sample(merged_data_list, min(30, len(merged_data_list)))
+        # data_list = random.sample(merged_data_list, min(30, len(merged_data_list)))
 
         # 처리된 데이터 개수 출력
-        logger.info(f"총 {len(data_list)}개의 뉴스 데이터를 처리합니다.")
+        logger.info(f"총 {len(merged_data_list)}개의 뉴스 데이터를 처리합니다.")
 
         # 모든 데이터를 순회하며 저장
 
@@ -182,7 +194,7 @@ class Command(BaseCommand):
         cat_df = pd.DataFrame(list(category_embeddings))
 
         articles_to_create = []
-        for data in data_list:
+        for data in merged_data_list:
             # pub_date 변환
             write_date = data.get('write_date')
             if isinstance(write_date, str):
