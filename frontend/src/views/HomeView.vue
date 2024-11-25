@@ -242,91 +242,93 @@
     ]
   }
 
-  // Mock Data for Image News Boards
-  const imageNewsBoards = ref([
-    {
-      id: 1,
-      title: '이미지 뉴스 01',
-      date: '2024-11-21',
-      likes: 10,
-      views: 100,
-      image: defaultImage
-    },
-    {
-      id: 2,
-      title: '이미지 뉴스 02',
-      date: '2024-11-20',
-      likes: 5,
-      views: 50,
-      image: defaultImage
-    }
-  ])
+  // // Mock Data for Image News Boards
+  // const imageNewsBoards = ref([
+  //   {
+  //     id: 1,
+  //     title: '이미지 뉴스 01',
+  //     date: '2024-11-21',
+  //     likes: 10,
+  //     views: 100,
+  //     image: defaultImage
+  //   },
+  //   {
+  //     id: 2,
+  //     title: '이미지 뉴스 02',
+  //     date: '2024-11-20',
+  //     likes: 5,
+  //     views: 50,
+  //     image: defaultImage
+  //   }
+  // ])
 
-  // Mock Data for News Cards
-  const newsCards = ref([
-    {
-      id: 3,
-      category: '경제',
-      title: '경제 뉴스 03',
-      content: '경제 뉴스 내용 03...',
-      date: '2024-11-19',
-      likes: 8,
-      views: 80,
-      tags: ['경제', '주식', '시장', '금융', '무역']
-    },
-    {
-      id: 4,
-      category: '정치',
-      title: '정치 뉴스 04',
-      content: '정치 뉴스 내용 04...',
-      date: '2024-11-18',
-      likes: 12,
-      views: 120,
-      tags: ['정치', '선거', '정책', '국회', '대통령']
-    },
-    {
-      id: 5,
-      category: '문화',
-      title: '문화 뉴스 05',
-      content: '문화 뉴스 내용 05...',
-      date: '2024-11-17',
-      likes: 7,
-      views: 70,
-      tags: ['문화', '예술', '공연', '전시', '영화']
-    },
-    {
-      id: 6,
-      category: '스포츠',
-      title: '스포츠 뉴스 06',
-      content: '스포츠 뉴스 내용 06...',
-      date: '2024-11-16',
-      likes: 15,
-      views: 150,
-      tags: ['스포츠', '축구', '야구', '농구', '배구']
-    }
-  ])
+  // // Mock Data for News Cards
+  // const newsCards = ref([
+  //   {
+  //     id: 3,
+  //     category: '경제',
+  //     title: '경제 뉴스 03',
+  //     content: '경제 뉴스 내용 03...',
+  //     date: '2024-11-19',
+  //     likes: 8,
+  //     views: 80,
+  //     tags: ['경제', '주식', '시장', '금융', '무역']
+  //   },
+  //   {
+  //     id: 4,
+  //     category: '정치',
+  //     title: '정치 뉴스 04',
+  //     content: '정치 뉴스 내용 04...',
+  //     date: '2024-11-18',
+  //     likes: 12,
+  //     views: 120,
+  //     tags: ['정치', '선거', '정책', '국회', '대통령']
+  //   },
+  //   {
+  //     id: 5,
+  //     category: '문화',
+  //     title: '문화 뉴스 05',
+  //     content: '문화 뉴스 내용 05...',
+  //     date: '2024-11-17',
+  //     likes: 7,
+  //     views: 70,
+  //     tags: ['문화', '예술', '공연', '전시', '영화']
+  //   },
+  //   {
+  //     id: 6,
+  //     category: '스포츠',
+  //     title: '스포츠 뉴스 06',
+  //     content: '스포츠 뉴스 내용 06...',
+  //     date: '2024-11-16',
+  //     likes: 15,
+  //     views: 150,
+  //     tags: ['스포츠', '축구', '야구', '농구', '배구']
+  //   }
+  // ])
 
   // 스토어에서 데이터 불러오기
   // 뉴스 데이터 상태 변수
-  // const imageNewsBoards = ref([])
-  // const newsCards = ref([])
+  const imageNewsBoards = ref([])
+  const newsCards = ref([])
 
-  // // 뉴스 데이터 가져오기
-  // const fetchNewsData = async () => {
-  //   // TODO: 실제 API 호출로 데이터 가져오기
-  //   // 임의의 데이터 사용
-  //   const newsData = await newsStore.fetchNewsByCategory(activeCategory.value, currentPage.value)
-  //   imageNewsBoards.value = newsData.imageNews
-  //   newsCards.value = newsData.newsCards
+  // 뉴스 데이터 가져오기
+  const fetchNewsData = async () => {
+    // TODO: 실제 API 호출로 데이터 가져오기
+    // 임의의 데이터 사용
+    // console.log(activeCategory.value)
+    const newsData = await newsStore.fetchNewsByCategory(activeCategory.value, currentPage.value)
+    //console.log(newsData)
+    imageNewsBoards.value = newsData.imageNews
+    newsCards.value = newsData.newsCards
 
-  //   // 총 페이지 수 업데이트
-  //   totalPages.value = Math.ceil(newsData.totalCount / 6)
-  // }
+    // 총 페이지 수 업데이트
+    totalPages.value = Math.ceil(newsData.totalCount / 6)
+  }
 
   onMounted(() => {
     boardStore.getBoards()
     // 스토어에서 불러오는 함수
-    // fetchNewsData()
+    fetchNewsData()
     fetchRankingLists()
   })
 

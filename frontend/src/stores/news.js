@@ -1,6 +1,7 @@
 // src/stores/news.js
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import defaultImage from '@/assets/default_image.png'
 
 export const useNewsStore = defineStore('news', {
   state: () => ({
@@ -59,20 +60,28 @@ export const useNewsStore = defineStore('news', {
     async fetchNewsByCategory(category, page) {
       try {
         // 실제 API 호출로 대체
-        // const response = await axios.get(`/api/news?category=${category}&page=${page}`)
-        // 임의의 데이터 반환
-        const response = {
-          data: {
-            imageNews: [
-              // 이미지 뉴스 데이터
-            ],
-            newsCards: [
-              // 뉴스 카드 데이터
-            ],
-            totalCount: 605, // 총 뉴스 개수
-          },
-        }
-        this.newsData = response.data
+        const response = await axios.get(`http://127.0.0.1:8000/api/news?category=${category}&page=${page}`)
+
+        //console.log(response.data['articles'])
+        this.newsData.imageNews = response.data['articles_imageNews'].map(news => ({
+          id: news.id,
+          title: news.title,
+          date: news.write_date || '2024-11-22',
+          likes: 10,
+          views: 10,
+          image: defaultImage
+        }))
+        this.newsData.newsCards = response.data['articles_newsCards'].map(news => ({
+          id: news.id,
+          category: category,
+          title: news.title,
+          content: news.content,
+          date: news.write_date || '2024-11-22',
+          likes: 10,
+          views: 10,
+          tags: ['경제', '주식', '시장', '금융', '무역']
+        }))
+        this.newsData.totalCount = response.data['total_pages']
         return this.newsData
       } catch (error) {
         console.error('뉴스 데이터 가져오기 오류:', error)
@@ -80,36 +89,9 @@ export const useNewsStore = defineStore('news', {
           imageNews: [],
           newsCards: [],
           totalCount: 0,
+          }
         }
-      }
     },
-    // 카테고리별 뉴스 데이터 가져오기
-    async fetchNewsByCategory(category, page) {
-        try {
-          // 실제 API 호출로 대체
-          // const response = await axios.get(`/api/news?category=${category}&page=${page}`)
-          // 임의의 데이터 반환
-          const response = {
-            data: {
-              imageNews: [
-                // 이미지 뉴스 데이터
-              ],
-              newsCards: [
-                // 뉴스 카드 데이터
-              ],
-              totalCount: 605, // 총 뉴스 개수
-            },
-          }
-          this.newsData = response.data
-          return this.newsData
-        } catch (error) {
-          console.error('뉴스 데이터 가져오기 오류:', error)
-          return {
-            imageNews: [],
-            newsCards: [],
-            totalCount: 0,
-          }
-        }
-      },
+    //
   },
 })

@@ -3,6 +3,7 @@ import random
 import time
 import os
 import numpy as np
+import pandas as pd
 ##from sklearn.decomposition import PCA
 from datetime import datetime
 import re
@@ -11,11 +12,11 @@ from bs4 import BeautifulSoup
 from django.core.management.base import BaseCommand
 from sentence_transformers import SentenceTransformer
 from openai import OpenAI
-from news.models import Article
+from news.models import Article, Category
 from django.db import IntegrityError, transaction
 import logging
 import dotenv
-
+from sklearn.metrics.pairwise import cosine_similarity
 # 로깅 설정
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -176,6 +177,10 @@ class Command(BaseCommand):
         logger.info(f"총 {len(data_list)}개의 뉴스 데이터를 처리합니다.")
 
         # 모든 데이터를 순회하며 저장
+
+        category_embeddings = Category.objects.all().values()
+        cat_df = pd.DataFrame(list(category_embeddings))
+
         articles_to_create = []
         for data in data_list:
             # pub_date 변환
@@ -187,15 +192,17 @@ class Command(BaseCommand):
                     write_date = datetime.now()
 
             embedding = get_embedding(text=f"{data.get('title', 'No Title')} {data.get('subtitle', '')}")
-
-
+            cat_df['similarities'] = cat_df.embedding.apply(lambda x:cosine_similarity(np.array(embedding).reshape(1, -1), np.array(x).reshape(1, -1)))
+            top_cat = cat_df.sort_values('similarities', ascending=False).head(1)['code'].values[0]
+            article_category = Category.objects.get(code=top_cat)
             article = Article(
                 title=data.get('title', 'No Title'),
                 subtitle=data.get('subtitle', ''),
                 content=data.get('content', ''),
                 write_date=write_date,
                 url=data.get('url', ''),
-                embedding = embedding
+                embedding = embedding,
+                category = article_category,
             )
             articles_to_create.append(article)
 
