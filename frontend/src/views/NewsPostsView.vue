@@ -7,6 +7,9 @@
           <div class="news-content">
             <div class="news-header">
               <div class="category">{{ newsData.category || '카테고리' }}</div>
+              <div class="related-universities">
+                  {{ newsData.universities.length > 0 ? newsData.universities.join(', ') : '관련 대학교 없음' }}
+              </div>
               <h1 class="title">{{ newsData.title || '뉴스 제목' }}</h1>
               <h2 class="subtitle">{{ newsData.subtitle || '부제목' }}</h2>
               <div class="news-meta">
@@ -91,7 +94,8 @@
     likes: 0,
     views: 0,
     content: '',
-    originalUrl: ''
+    originalUrl: '',
+    universities: []
   })
   
   // 유사한 뉴스 상태 변수
@@ -142,9 +146,10 @@
     await newsStore.fetchNewsItem(id)  // Pinia 스토어의 fetchNewsItem 액션 호출
     newsData.value = {
       ...newsStore.newsItem,
-      category: '기본 카테고리',  // 상수값으로 고정
+      //category: '기본 카테고리',  // 상수값으로 고정
       likes: 0,  // 상수값으로 고정
-      views: 0  // 상수값으로 고정
+      views: 0,  // 상수값으로 고정
+      universities: ['연세대학교'] // 임의의 대학교 이름 추가
     }  // 스토어에서 가져온 데이터를 newsData에 할당
   }
 

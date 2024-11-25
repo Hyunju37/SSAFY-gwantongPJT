@@ -886,7 +886,7 @@
   }
 
   .hash-tag {
-    width: 150px;
+    width: 180px;
     height: 40px;
     border-radius: 10px;
     background-color: #F7F7F7;

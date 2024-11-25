@@ -23,7 +23,8 @@ export const useNewsStore = defineStore('news', {
           subtitle: response.data.subtitle,
           date: response.data.write_date || '2024-11-22',
           content: response.data.content,
-          originalUrl: response.data.url
+          originalUrl: response.data.url,
+          category: response.data.category,
         }
         //console.log(this.newsItem)
       } catch (error) {
@@ -79,9 +80,9 @@ export const useNewsStore = defineStore('news', {
           date: news.write_date || '2024-11-22',
           likes: 10,
           views: 10,
-          tags: ['경제', '주식', '시장', '금융', '무역']
+          tags: news.keywords
         }))
-        this.newsData.totalCount = response.data['total_pages']
+        this.newsData.totalCount = response.data['total_articles']
         return this.newsData
       } catch (error) {
         console.error('뉴스 데이터 가져오기 오류:', error)

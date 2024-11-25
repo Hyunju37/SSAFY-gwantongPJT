@@ -9,6 +9,7 @@ class ArticleListSerializer(serializers.ModelSerializer):
 
 class ArticleSerializer(serializers.ModelSerializer):
     write_date = serializers.DateTimeField(format='%Y-%m-%d')
+    category = serializers.CharField(source='category.name', read_only=True)
     class Meta:
         model = Article
         fields = '__all__'

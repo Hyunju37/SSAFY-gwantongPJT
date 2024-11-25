@@ -9,7 +9,7 @@ from .models import Article
 import pandas as pd
 import dotenv
 from openai import OpenAI
-
+from .services import get_keywords
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import ast
@@ -84,37 +84,30 @@ def get_articles_by_category(request):
         page = request.query_params.get('page', 1)
         if category == '전체':
             articles = Article.objects.all().order_by('-write_date')
-            paginator = Paginator(articles, 6)
-            try:
-                paginated_articles = paginator.page(page)
-            except PageNotAnInteger:
-                paginated_articles = paginator.page(1)
-            except EmptyPage:
-                return Response({'error': 'No more pages'}, status=404)
-            serializer = ArticleSerializer(paginated_articles, many=True)
-            return Response({
-                'page': page,
-                'total_pages': paginator.num_pages,
-                'total_articles': paginator.count,
-                'articles_imageNews': serializer.data[:2],
-                'articles_newsCards': serializer.data[2:]
-            }, status=200)
         else:
             articles = Article.objects.filter(category__name=category).order_by('-write_date')  # 최신순 정렬
-            paginator = Paginator(articles, 6)
-            try:
-                paginated_articles = paginator.page(page)
-            except PageNotAnInteger:
-                paginated_articles = paginator.page(1)
-            except EmptyPage:
-                return Response({'error': 'No more pages'}, status=404)
-            serializer = ArticleSerializer(paginated_articles, many=True)
-            return Response({
-                'page': page,
-                'total_pages': paginator.num_pages,
-                'total_articles': paginator.count,
-                'articles_imageNews': serializer.data[:2],
-                'articles_newsCards': serializer.data[2:]
-            }, status=200)
+        paginator = Paginator(articles, 6)
+        try:
+            paginated_articles = paginator.page(page)
+        except PageNotAnInteger:
+            paginated_articles = paginator.page(1)
+        except EmptyPage:
+            return Response({'error': 'No more pages'}, status=404)
+        serializer = ArticleSerializer(paginated_articles, many=True)
+        data = {
+            'page': page,
+            'total_pages': paginator.num_pages,
+            'total_articles': paginator.count,
+            'articles_imageNews': serializer.data[:2],
+            'articles_newsCards': serializer.data[2:]
+        }
+        for article in data['articles_newsCards']:
+            content = article.get('content', '')
+            if content:
+                keywords = get_keywords(content)
+                article['keywords'] = keywords
+            else:
+                article['keywords'] = []
+        return Response(data, status=200)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
