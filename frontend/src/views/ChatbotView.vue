@@ -28,7 +28,7 @@
             <h2>Chat Bot</h2>
             <div class="chat-window" ref="chatWindow">
               <div
-                v-for="(message, index) in messages"
+                v-for="(message, index) in chatbotStore.conversation"
                 :key="index"
                 :class="['message', message.sender]"
               >
@@ -56,12 +56,12 @@
   
   <script setup>
   import { ref, onMounted, nextTick } from 'vue'
-  // import { useChatbotStore } from '@/stores/chatbot' // 필요 시 store 모듈
+  import { useChatbotStore } from '@/stores/chatbot' // 필요 시 store 모듈
   import { useRouter } from 'vue-router'
   import Layout from '@/components/Layout.vue'
 
   const router = useRouter()
-  
+  const chatbotStore = useChatbotStore()
   // 상태 변수
   const similarNews = ref([
     {
@@ -88,20 +88,22 @@
     router.push(`/news-posts/${id}`)
   }
   
-  const messages = ref([
-    { sender: 'bot', content: '안녕하세요! 무엇을 도와드릴까요?' }
-  ])
+  // const messages = ref([
+  //   { sender: 'bot', content: '안녕하세요! 무엇을 도와드릴까요?' }
+  // ])
   
   const userInput = ref('')
   const isThinking = ref(false)
-  
+
+  const chatWindow = ref(null)
+
   // 메시지 전송 함수
-  const sendMessage = () => {
+  const sendMessage = async () => {
     const input = userInput.value.trim()
     if (input === '') return
   
     // 사용자 메시지 추가
-    messages.value.push({ sender: 'user', content: input })
+    chatbotStore.conversation.push({ sender: 'user', content: input })
     userInput.value = ''
   
     // 스크롤을 가장 아래로 이동
@@ -109,12 +111,15 @@
   
     // Bot의 응답을 시뮬레이션
     isThinking.value = true
-    setTimeout(() => {
-      isThinking.value = false
-      const botResponse = getBotResponse(input)
-      messages.value.push({ sender: 'bot', content: botResponse })
-      scrollToBottom()
-    }, 1500) // 1.5초 후에 응답
+    await chatbotStore.sendMessage(input)
+    isThinking.value = false
+    scrollToBottom()
+    // setTimeout(() => {
+    //   isThinking.value = false
+    //   const botResponse = getBotResponse(input)
+    //   messages.value.push({ sender: 'bot', content: botResponse })
+    //   scrollToBottom()
+    // }, 1500) // 1.5초 후에 응답
   }
   
   // Bot 응답 생성 함수 (간단한 예시)

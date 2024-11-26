@@ -14,6 +14,9 @@ from .services import get_keywords, get_uni_name
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import ast
+from langchain_openai.chat_models import ChatOpenAI
+from langchain.schema import HumanMessage, SystemMessage
+
 # Create your views here.
 
 @api_view(['GET'])
@@ -128,3 +131,43 @@ def news_groupby_category_dashboard(request):
     )
     result = list(data)
     return JsonResponse(result, safe=False, json_dumps_params={'ensure_ascii': False})
+
+@api_view(['POST'])
+def university_chatbot(request):
+    message = request.data.get('message', None)
+    if message is None:
+        # 'message' 키가 없을 경우 에러 응답
+        return Response({'error': 'Message not provided'}, status=status.HTTP_400_BAD_REQUEST)
+    dotenv_file = dotenv.find_dotenv('/home/hj/final-project/.env')
+    CLIENT_ID = dotenv.dotenv_values(dotenv_file)['OPENAI_API_KEY']
+    client = OpenAI(api_key=CLIENT_ID)
+
+    msg_embedding = client.embeddings.create(input = [message], 
+                                            model='text-embedding-3-small',
+                                            dimensions=256).data[0].embedding
+    
+    articles = Article.objects.all().values()
+    df = pd.DataFrame(list(articles))
+    df['similarities'] = df.embedding.apply(lambda x:cosine_similarity(np.array(msg_embedding).reshape(1, -1), np.array(x).reshape(1, -1)))
+    augid = df.sort_values('similarities', ascending=False).head(1)['id'].values[0]
+    aug_article = Article.objects.get(pk=augid).content
+
+    llm = ChatOpenAI(
+        model_name='gpt-4o-mini', 
+        temperature=0,
+        api_key=CLIENT_ID
+    )
+    system_msg = SystemMessage(
+        content=f"당신은 대학교에 관한 최신 이슈와 주요 정보를 제공해 주는 전문가입니다.\
+        대학교 입시, 대학원 입시 등을 준비하는 사람들에게 도움을 주어야 합니다.\
+        사용자의 질문에 관한 정확한 정보를 전달하는 것이 목적이고, 필요하다면 주어지는 최신 뉴스 기사를 참조할 수 있습니다.\
+        만약 사용자가 질문한 특정 대학이 최신 뉴스기사 내용에 포함되지 않거나 관련 없다고 판단된다면 무시해도 됩니다."
+    )
+    human_msg = HumanMessage(
+        content=f'사용자의 질문:{message}\n\n최신 뉴스기사:{aug_article}'
+    )
+    conversation = [system_msg, human_msg]
+    response = llm.invoke(conversation)
+    return Response(response.content, status=status.HTTP_200_OK)
+
+    
