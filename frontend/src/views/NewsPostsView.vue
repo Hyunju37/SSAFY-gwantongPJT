@@ -144,12 +144,13 @@
   
   const fetchNewsItem = async (id) => {
     await newsStore.fetchNewsItem(id)  // Pinia 스토어의 fetchNewsItem 액션 호출
+    console.log(newsStore.newsItem)
     newsData.value = {
       ...newsStore.newsItem,
       //category: '기본 카테고리',  // 상수값으로 고정
       likes: 0,  // 상수값으로 고정
       views: 0,  // 상수값으로 고정
-      universities: ['연세대학교'] // 임의의 대학교 이름 추가
+      //universities: ['브라운대'] // 임의의 대학교 이름 추가
     }  // 스토어에서 가져온 데이터를 newsData에 할당
   }
 

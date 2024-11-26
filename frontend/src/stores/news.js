@@ -25,6 +25,7 @@ export const useNewsStore = defineStore('news', {
           content: response.data.content,
           originalUrl: response.data.url,
           category: response.data.category,
+          universities: response.data.uni_names,
         }
         //console.log(this.newsItem)
       } catch (error) {

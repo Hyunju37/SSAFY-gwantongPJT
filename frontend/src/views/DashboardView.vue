@@ -4,7 +4,10 @@
       <!-- Main Section -->
       <main class="main-section">
         <section class="data-visualizations">
-          <div class="visualization-card">데이터 시각화 1</div>
+          <div class="visualization-card">
+            <Doughnut v-if="pieChartData" :data="pieChartData" :options="pieChartOptions" style="max-height: 100%; max-width: 100%;"/>
+            <p v-else>데이터를 불러오는 중입니다...</p>
+          </div>
           <div class="visualization-card">데이터 시각화 2</div>
           <div class="visualization-card">데이터 시각화 3</div>
           <div class="visualization-card">데이터 시각화 4</div>
@@ -14,10 +17,12 @@
   </template>
   
   <script setup>
-  import { onMounted } from 'vue'
+  import { Doughnut } from 'vue-chartjs'
+  import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, CategoryScale } from 'chart.js'
+  import { onMounted, ref, computed } from 'vue'
   import { useDashboardStore } from '@/stores/dashboard'
   import Layout from '@/components/Layout.vue'
-  
+  ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale);
   // 스토어 사용
   const dashboardStore = useDashboardStore()
   
@@ -25,6 +30,56 @@
   onMounted(() => {
     dashboardStore.fetchData()
   })
+
+  const pieChartData = computed(() => {
+    if (dashboardStore.dataVisualization1) {
+      const labels = dashboardStore.dataVisualization1.map(item => item.category__name)
+      const data = dashboardStore.dataVisualization1.map(item => item.article_count)
+      return {
+        labels: labels,
+        datasets: [
+        {
+          label: '카테고리별 기사 수',
+          data: data,
+          backgroundColor: [
+            '#FF6F61', // 코랄 레드
+            '#6B5B95', // 로얄 퍼플
+            '#88B04B', // 올리브 그린
+            '#F7CAC9', // 로즈 쿼츠
+            '#92A8D1', // 스카이 블루
+            '#955251', // 로즈 브라운
+            '#B565A7', // 오키드 퍼플
+            '#009B77', // 터키옥스 그린
+            '#DD4124', // 피에스타 레드
+            '#45B8AC', // 아쿠아 그린
+            '#EFC050', // 골든 옐로우
+            '#5B5EA6', // 블루베리 블루
+          ],
+        },
+      ],
+      }
+    }
+    else {
+      return null
+    }
+  })
+
+  const pieChartOptions = {
+    responsive: false,
+    maintainAspectRatio: false,
+    aspectRatio: 1,
+  }  
+
+  const generateColors = (numColors) => {
+    const colors = [];
+    const colorStep = 360 / numColors; // 색상 간의 간격 설정 (360도 범위 내에서)
+
+    for (let i = 0; i < numColors; i++) {
+      const hue = i * colorStep;
+      colors.push(`hsl(${hue}, 70%, 60%)`); // HSL 색상으로 생성
+    }
+    return colors;
+  };
   </script>
   
   <style scoped>

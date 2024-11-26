@@ -1,6 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.shortcuts import render
+from django.db.models import Count
 from rest_framework import status
 from django.http import JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -9,7 +10,7 @@ from .models import Article
 import pandas as pd
 import dotenv
 from openai import OpenAI
-from .services import get_keywords
+from .services import get_keywords, get_uni_name
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import ast
@@ -44,9 +45,15 @@ def get_article_by_id(request, pk):
     try:
         # pk에 해당하는 Article 객체를 찾습니다
         article = Article.objects.get(pk=pk)
+        try:
+            uni_names = get_uni_name(article.content)
+        except Exception as e:
+            uni_names = None
         # 직렬화하여 반환
         serializer = ArticleSerializer(article)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        data = serializer.data
+        data['uni_names'] = uni_names
+        return Response(data, status=status.HTTP_200_OK)
     except Article.DoesNotExist:
         return Response({'error': 'Article not found'}, status=status.HTTP_404_NOT_FOUND)
     
@@ -111,3 +118,13 @@ def get_articles_by_category(request):
         return Response(data, status=200)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+@api_view(['GET'])
+def news_groupby_category_dashboard(request):
+    data = (
+        Article.objects.values('category__name')
+        .annotate(article_count=Count('id'))
+        .order_by('category__name')
+    )
+    result = list(data)
+    return JsonResponse(result, safe=False, json_dumps_params={'ensure_ascii': False})

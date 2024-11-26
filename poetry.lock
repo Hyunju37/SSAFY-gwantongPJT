@@ -474,6 +474,16 @@ files = [
 django = ">=4.2"
 
 [[package]]
+name = "docopt"
+version = "0.6.2"
+description = "Pythonic argument parser, that will make you smile"
+optional = false
+python-versions = "*"
+files = [
+    {file = "docopt-0.6.2.tar.gz", hash = "sha256:49b3a825280bd66b3aa83585ef59c4a8c82f2c8a522dbe754a8bc8d08c85c491"},
+]
+
+[[package]]
 name = "exceptiongroup"
 version = "1.2.2"
 description = "Backport of PEP 654 (exception groups)"
@@ -739,6 +749,26 @@ files = [
     {file = "h11-0.14.0-py3-none-any.whl", hash = "sha256:e3fe4ac4b851c468cc8363d500db52c2ead036020723024a109d37346efaa761"},
     {file = "h11-0.14.0.tar.gz", hash = "sha256:8f19fbbe99e72420ff35c00b27a34cb9937e902a8b810e2c88300c6f0a3b699d"},
 ]
+
+[[package]]
+name = "hdfs"
+version = "2.7.3"
+description = "HdfsCLI: API and command line interface for HDFS."
+optional = false
+python-versions = "*"
+files = [
+    {file = "hdfs-2.7.3.tar.gz", hash = "sha256:752a21e43f82197dce43697c73f454ba490838108c73a57a9247efb66d1c0479"},
+]
+
+[package.dependencies]
+docopt = "*"
+requests = ">=2.7.0"
+six = ">=1.9.0"
+
+[package.extras]
+avro = ["fastavro (>=0.21.19)"]
+dataframe = ["fastavro (>=0.21.19)", "pandas (>=0.14.1)"]
+kerberos = ["requests-kerberos (>=0.7.0)"]
 
 [[package]]
 name = "httpcore"
@@ -3376,4 +3406,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "c9bbbac08498b6679fbf41563ab46784bd1075e545b31f56791d38091d99f494"
+content-hash = "54e25efcb05cfff039c9e93162d84ad2740a43b70d8ed44923f205d29c5830fb"
