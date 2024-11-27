@@ -5,10 +5,13 @@
       <main class="main-section">
         <section class="data-visualizations">
           <div class="visualization-card">
+            <h2>카테고리별 기사 수</h2>
             <Doughnut v-if="pieChartData" :data="pieChartData" :options="pieChartOptions" style="max-height: 100%; max-width: 100%;"/>
             <p v-else>데이터를 불러오는 중입니다...</p>
           </div>
-          <div class="visualization-card">데이터 시각화 2</div>
+          <div class="visualization-card">
+            <pre v-if="dashboardStore.dataVisualization2">{{ JSON.stringify(dashboardStore.dataVisualization2, null, 2) }}</pre>
+          </div>
           <div class="visualization-card">데이터 시각화 3</div>
           <div class="visualization-card">데이터 시각화 4</div>
         </section>
@@ -19,7 +22,7 @@
   <script setup>
   import { Doughnut } from 'vue-chartjs'
   import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, CategoryScale } from 'chart.js'
-  import { onMounted, ref, computed } from 'vue'
+  import { onMounted, ref, computed, watch } from 'vue'
   import { useDashboardStore } from '@/stores/dashboard'
   import Layout from '@/components/Layout.vue'
   ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale);
@@ -68,7 +71,7 @@
     responsive: false,
     maintainAspectRatio: false,
     aspectRatio: 1,
-  }  
+  }
 
   const generateColors = (numColors) => {
     const colors = [];

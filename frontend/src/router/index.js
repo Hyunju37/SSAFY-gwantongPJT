@@ -45,7 +45,7 @@ const routes = [
     path: '/chatbot',
     name: 'Chatbot',
     component: ChatbotView,
-    // meta: { requiresAuth: true } // 인증이 필요한 라우트
+    meta: { requiresAuth: true } // 인증이 필요한 라우트
   },
   {
     path: '/news-posts/:id',

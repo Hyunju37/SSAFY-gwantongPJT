@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
 
+
 export const useDashboardStore = defineStore('dashboard', () => {
   const API_URL = 'http://127.0.0.1:8000' // 실제 API URL로 변경 필요
   const dataVisualization1 = ref(null)
@@ -17,6 +18,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
 
       const response2 = await axios.get(`${API_URL}/api/dashboard/data2`)
       dataVisualization2.value = response2.data
+      console.log(dataVisualization2.value)
 
       const response3 = await axios.get(`${API_URL}/api/dashboard/data3`)
       dataVisualization3.value = response3.data

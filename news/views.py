@@ -16,7 +16,12 @@ import numpy as np
 import ast
 from langchain_openai.chat_models import ChatOpenAI
 from langchain.schema import HumanMessage, SystemMessage
-
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+import string
+from collections import Counter
+from konlpy.tag import Okt
 # Create your views here.
 
 @api_view(['GET'])
@@ -132,6 +137,34 @@ def news_groupby_category_dashboard(request):
     result = list(data)
     return JsonResponse(result, safe=False, json_dumps_params={'ensure_ascii': False})
 
+@api_view(['GET'])
+def wordcloud_dashboard(request):
+    try:
+        #nltk.download('punkt_tab')
+        articles = Article.objects.all()
+        all_content = ' '.join([article.content for article in articles])
+        print(all_content)
+        translator = str.maketrans('', '', string.punctuation)
+        all_content = all_content.translate(translator)
+        
+        okt = Okt()
+        #tagged_nouns = okt.pos(all_content, norm=True, stem=True)
+        #proper_nouns = [word for word, pos in tagged_nouns if pos == 'Noun']
+        #tokens = word_tokenize(all_content)
+        korean_stopwords = set([
+            '의', '가', '이', '은', '들', '는', '좀', '잘', '걍', '과', '도',
+            '를', '으로', '자', '에', '와', '한', '하다'
+        ])
+        nouns = okt.nouns(all_content)
+        filtered_nouns = [word for word in nouns if word not in korean_stopwords and len(word) > 1]
+        word_counts = Counter(filtered_nouns)
+        top_n = 100
+        most_common = word_counts.most_common(top_n)
+        wordcloud_data = [{'name': word, 'value': count} for word, count in most_common]
+        return Response(wordcloud_data, status=200)
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+    
 @api_view(['POST'])
 def university_chatbot(request):
     message = request.data.get('message', None)
@@ -169,5 +202,3 @@ def university_chatbot(request):
     conversation = [system_msg, human_msg]
     response = llm.invoke(conversation)
     return Response(response.content, status=status.HTTP_200_OK)
-
-    

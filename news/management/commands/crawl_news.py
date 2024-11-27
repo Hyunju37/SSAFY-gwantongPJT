@@ -68,12 +68,12 @@ class Command(BaseCommand):
 
             # 최대 기사 수와 한 번에 가져올 기사 수 설정
             # MAX_ARTICLES = 30
-            DISPLAY = 10  # 한 번에 가져올 기사 수 (최대 100개)
+            DISPLAY = 20  # 한 번에 가져올 기사 수 (최대 100개)
             valid_news_count = 0
             start = 1
             # 뉴스 데이터 저장 리스트
             news_list = []
-            while valid_news_count < 100:
+            while valid_news_count < 200:
                 url = f'{base_url}?query={encoded_query}&display={DISPLAY}&start={start}'
             # for start in range(1, MAX_ARTICLES + 1, DISPLAY):
             #     # API 요청 URL 구성
@@ -138,7 +138,7 @@ class Command(BaseCommand):
                             'url': link
                         })
                         valid_news_count += 1
-                        if valid_news_count >= 100:
+                        if valid_news_count >= 200:
                             break
                     # API 호출 제한을 피하기 위해 잠시 대기
                     time.sleep(0.5)
